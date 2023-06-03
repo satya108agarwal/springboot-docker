@@ -1,0 +1,17 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: springboot-docker
+  description: Canary Application Demo
+  tags:
+    - java
+    - spring
+    - web
+    - docker
+  annotations:
+    gitlab.eng.vmware.com/project-slug: vmware-navigator-practice/delivery/state-street-rpm/springboot-docker
+    backstage.io/kubernetes-label-selector: app.kubernetes.io/part-of=springboot-docker
+spec:
+  type: service
+  lifecycle: experimental
+  owner: rpm-team

@@ -1,0 +1,50 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.0.5'
+	id 'io.spring.dependency-management' version '1.1.0'
+	id 'com.google.cloud.tools.jib' version '3.2.0'
+}
+
+group = 'com.vmw.rpm'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+jib {
+	extraDirectories {
+		permissions = [
+				'/mnt/data': '755'  // Read/write/execute for owner, read/execute for group/other
+		]
+	}
+	to {
+		image = 'springboot-docker'
+		tags = ['latest']
+	}
+
+	container {
+		jvmFlags = ['-Xms512m', '-Xmx1024m']
+		mainClass = 'com.vmw.rpm.springbootdocker.SpringbootDockerApplication'
+		ports = ['8080']
+		volumes =['/mnt/data']
+
+	}
+
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+jar {
+	enabled = false
+}

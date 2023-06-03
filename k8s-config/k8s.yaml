@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: springboot-docker-volume
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /Users/satyanarayaa/Documents/statestreet/temp
+
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: springboot-docker-claim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  selector:
+    matchLabels:
+      name: springboot-docker-volume
+
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springboot-docker-deployment
+  labels:
+    app: springboot-docker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: springboot-docker
+  template:
+    metadata:
+      labels:
+        app: springboot-docker
+    spec:
+      containers:
+        - name: springboot-docker-container
+          image: springboot-docker:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          volumeMounts:
+            - name: data-volume
+              mountPath: /mnt/data
+          securityContext:
+            privileged: true
+      volumes:
+        - name: data-volume
+          persistentVolumeClaim:
+            claimName: springboot-docker-claim
