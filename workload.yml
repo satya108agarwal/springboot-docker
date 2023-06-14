@@ -1,0 +1,23 @@
+apiVersion: carto.run/v1alpha1
+kind: Workload
+metadata:
+  creationTimestamp: null
+  labels:
+    apps.tanzu.vmware.com/workload-type: web
+  name: springboot-docker
+  namespace: config-server
+spec:
+  serviceClaims:
+    - name: spring-properties
+      ref:
+        apiVersion: services.apps.tanzu.vmware.com/v1alpha1
+        kind: ResourceClaim
+        name: config-server-claim
+  env:
+    - name: SPRING_CONFIG_IMPORT
+      value: "optional:configtree:${SERVICE_BINDING_ROOT}/spring-properties/"
+  source:
+    git:
+      url: git@gitlab.eng.vmware.com:vmware-navigator-practice/delivery/state-street-rpm/springboot-docker.git
+      ref:
+        branch: main
